@@ -1,0 +1,32 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/s/bach/d/under/sethgene/cs253/hw2/hw2.cc
+iostream
+-
+string
+-
+cctype
+-
+sys/types.h
+-
+unistd.h
+-
+cstdlib
+-
+wait.h
+-
+vector
+-
+fstream
+-
+stdio.h
+-
+stdlib.h
+-
+

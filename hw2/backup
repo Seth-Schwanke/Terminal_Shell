@@ -1,0 +1,140 @@
+#include <iostream>
+#include <string>
+#include <cctype>
+#include <sys/types.h>	
+#include <unistd.h>
+#include <cstdlib>	
+#include <wait.h>	
+#include <vector>	
+#include <fstream>
+#include <stdio.h>
+#include <stdlib.h>
+using namespace std;
+string program_name; 
+
+//Code provided by Jack Applin CS253 CSU spring 2021
+bool execute(vector<string> command) {
+    // Convert vector of C++ strings to an array of C strings for exectp():
+    vector<char *> argv;		// vector of C string pointers
+    for (auto &v : command)		// for each C++ string:
+	argv.push_back(v.data());	//    add address of C-string inside it
+    argv.push_back(nullptr);		// argv ends with a null pointer
+
+    // Duplicate ourself: -1:error, 0:child, >0:parent
+    const auto pid = fork();		// step #1: copy ourself
+    if (pid < 0)
+	return false;			// fork failure?
+    if (pid == 0) {			// child?
+	execvp(argv[0], argv.data());	// step #2: replace child with new prog
+	exit(0xff);			// only got here if execvp() failed.
+    }
+    int status;
+    wait(&status);			// step #3: wait for child to finish
+    return status != 0xff00;		// true iff we succeeded
+}
+
+//End of provided code
+
+void cmd_process(string input){
+string temp = "";
+vector<string> cmd;
+	for(size_t i = 0; i < input.size(); i++){
+	
+	
+			
+	
+	
+	string temp3 = ""; 
+	for(size_t y = 0; y < cmd.size(); y++){
+			temp3 += cmd[y]; 
+			}
+	//cout << temp3 << " t \n";
+		if(input[i] == '\\'){ //is it a slash?
+		temp += input[i+1];	//add slashed item to temp
+		i++;			//skip over item being slashed
+		continue;		//move on
+		}
+		
+		else if(input[i] == '('){
+		cmd.push_back(temp);	//push temp to vector
+		//temp.clear();		//clear it
+		continue; 		//move on
+		}
+		
+		else if(input[i] == ')'){
+			cout << "inside ) ";
+			string temp2 = "";
+			for(size_t z = 0; z < cmd.size(); z++){
+			temp2 += cmd[z]; 
+			}
+			if(!execute(cmd)){
+			cerr << program_name << ": can't run: " << temp2 << "\n"; 
+			exit (EXIT_FAILURE);
+			}
+			else{
+			//temp.clear();
+			cout << temp2;
+			continue;
+			}
+		}
+
+		else if(isspace(input[i])){
+		cmd.push_back(temp);
+		cout << "This is temp inside isspace: " << temp << "\n";
+		//temp.clear();
+		continue;
+		}
+
+		else{
+		temp+= input[i];
+		cout << "THIS IS TEMP: " << temp << "\n";
+		}
+	}
+}
+
+void printer(string input)
+{
+cout << "INPUT:\n" << input << "\n";
+}
+
+void analyze(istream &in)
+{
+string line;
+string full = "";
+	while(getline(in,line))
+	{
+	full += line;
+	line.clear();
+	}
+	cmd_process(full);
+	cout << "inside analyze\n";
+}
+
+int main(int argc, char *argv[])
+{
+
+program_name = argv[0];
+
+if (argc > 1){
+	for(int i = 1; i < argc; i++){ //go through argv for files
+	ifstream in(argv[i]); //create f stream
+	if(!in.is_open()){ //was it able to open the file?
+	cerr << program_name << ": " << argv[i] << " can not be opened. Exiting.\n"; //std error msg
+	exit (EXIT_FAILURE); //exit the program
+	}
+	string s;
+	string full= "";
+		while(getline(in,s)){
+		full += s;
+		s.clear();
+		}
+	//cout << "This is full: " << full << "\n";
+	cmd_process(full);
+	}
+
+}
+	else
+	analyze(cin);
+
+return 0;
+}
